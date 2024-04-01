@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <!-- Agrega la referencia a Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Agrega SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <style>
+        /* Personaliza el estilo según sea necesario */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            /* Esto hace que el contenido ocupe el 100% de la altura de la ventana */
+        }
+
+        .login-form {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .form-group label {
+            font-weight: bold;
+        }
+
+        .btn-login {
+            background-color: #007bff;
+            color: #fff;
+            transition: background-color 0.3s;
+        }
+
+        .btn-login:hover {
+            background-color: #0056b3;
+        }
+
+        /* Estilo adicional para el ícono del ojo */
+        .toggle-password {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 login-container">
+                <form class="login-form" method="POST" action="{{ app_path }}">
+                    {% csrf_token %}
+                    <div class="form-group text-center">
+                        <img src="{% static 'img/TiendaF.png' %}" alt="Logo" class="login-img">
+                    </div>
+
+                    <!-- Aquí se muestra la alerta con SweetAlert2 -->
+                        {% comment %} <script>
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: '<?php echo $alert; ?>'
+                            });
+                        </script> {% endcomment %}
+                    <div class="form-group">
+                        <label for="correo">Usuario:</label>
+                        <input type="text" class="form-control" name="username" id="username" placeholder="Ingresa tu usuario">
+                    </div>
+                    <div class="form-group">
+                        <label for="pass">Contraseña:</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" name="password" id="password" placeholder="Ingresa tu contraseña" maxlength="8">
+                            
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-login btn-block">Ingresar</button>
+                    <div class="form-group text-center">
+                        <a href="Cliente/recuperar_contraseña.php">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<!-- Agrega la referencia a Bootstrap JS y jQuery al final del archivo -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+
+</body>
+
+</html>
