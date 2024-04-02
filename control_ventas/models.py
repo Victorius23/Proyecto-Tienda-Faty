@@ -10,7 +10,8 @@ from control_productos.models import Producto
 # Create your models here.
 
 class Venta(TimeStampedModel):
-    cliente = models.ForeignKey(User, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(User, on_delete=models.CASCADE, related_name='compras', null=True, blank=True)
+    empleado = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ventas')
     total = models.DecimalField(max_digits=10, decimal_places=2)
     fecha = models.DateTimeField(auto_now_add=True)
     #estado del pedido "en proceso", "entregado", "cancelado"
