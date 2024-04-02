@@ -11,7 +11,7 @@
      <h2>{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</h2>
    {% endif %}
    {{ inline_admin_formset.formset.non_form_errors }}
-   
+
    {% if app_label == 'control_ventas' %}
    {% comment %} select categorias   {% endcomment %}
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -19,12 +19,25 @@
    <div class="">
       <select name="categoria" id="id_categoria">
         <option value="">Categoria</option>
-        
+
       </select>
    </div>
-  
+
   <script>
     $(document).ready(function(){
+
+      // agregar un span al lado de "tabular inline-related last-related" que diga
+      // "total"
+      var totalSpan = $('<span id="totalventa">Total: $0.00</span>');
+      $('.tabular.inline-related.last-related').after(totalSpan);
+      // hacer que el texto aparezca pegado al borde derecho
+      totalSpan.css('float', 'right');
+      // agregar 50% de margen a la derecha
+      totalSpan.css('margin-right', '20%');
+       
+
+      var readonlyDiv = $('.form-row.field-fecha .readonly');
+      readonlyDiv.text(new Date().toLocaleDateString());
 
       // agregar columna de precio
       $('th.column-cantidad').after('<th class="column-precio">Precio</th>');
@@ -65,31 +78,34 @@
         dataType: 'json',
         data: {categoria: categoria_id},
         success: function(response){
-            // eliminar todas las opciones a excepción del que tenga "----------"
-            // select name="detalleventa_set-x-producto" id="id_detalleventa_set-x-producto"
-            if (categoria_id == ""){
-              
+          $('select[name$=producto]').each(function() {
+            // Verificar si el select ya tiene opciones
+            if ($(this).val() != "") {
+                return; // Si ya tiene opciones, salir del bucle para este select
             }
-            $('select[name$=producto]').find('option').remove().end().append('<option value="">---------</option>');
-            console.log(response);
-            var len = response.length;
-            for (var i = 0; i < len; i++) {
-              var id = response[i].id;
-              var name = response[i].nombre;
-              var option = "<option value='"+id+"'>"+name+"</option>";
-              $('select[name$=producto]').append(option);
+        
+            // Limpiar opciones existentes y agregar la opción por defecto
+            $(this).find('option').remove().end().append('<option value="">---------</option>');
+        
+            // Agregar opciones del response
+            for (var i = 0; i < response.length; i++) {
+                var id = response[i].id;
+                var name = response[i].nombre;
+                var option = "<option value='" + id + "'>" + name + "</option>";
+                $(this).append(option);
             }
-          
+        });
+        
           }
       });
-      
-     
+
+
     });
 
-   
-  </script> 
 
-   
+  </script>
+
+
 
    {% endif %}
 
@@ -164,6 +180,15 @@
         console.log(producto_id);
         var fila = $(this).attr('name');
         fila = fila.split('-')[1];
+        if (producto_id == ""){
+          // si no se ha seleccionado un producto, borrar el texto de la columna precio
+          $('select[name^="detalleventa_set-'+fila+'-producto"]').closest('tr').find('td.field-precio').text('-');
+          $('select[name^="detalleventa_set-'+fila+'-producto"]').closest('tr').find('td.field-importe').text('-');
+          $('select[name^="detalleventa_set-'+fila+'-producto"]').closest('tr').find('input[name$=cantidad]').val('');
+          // total a 0
+          $('#totalventa').text('Total: $0.00');
+          return;
+        }
         $.ajax({
             url: "/api/productos/" + producto_id + "/",
             type: 'get',
@@ -171,18 +196,33 @@
             data: {producto: producto_id},
             success: function(response){
                // extraer x de name=detalleventa_set-x-producto
-                
-                console.log("fila"+fila);
-                console.log(response);
+
                 var precio = response.precioventa;
                 console.log(precio);
-                
+
                 $('select[name^="detalleventa_set-'+fila+'-producto"]').closest('tr').find('td.field-precio').text(precio);
+                $('select[name^="detalleventa_set-'+fila+'-producto"]').closest('tr').find('td.field-importe').text(precio * $('select[name^="detalleventa_set-'+fila+'-producto"]').closest('tr').find('input[name$=cantidad]').val());
             }
         });
-        
+
     });
-</script> 
+
+    // * cuando la cantidad cambie, actualizar el subtotal de la fila
+    $(document).on('change', 'input[name$=cantidad]', function() {
+        var cantidad = $(this).val();
+        var fila = $(this).attr('name');
+        fila = fila.split('-')[1];
+        var precio = $('select[name^="detalleventa_set-'+fila+'-producto"]').closest('tr').find('td.field-precio').text();
+        console.log(precio);
+        var subtotal = cantidad * precio;
+        $('select[name^="detalleventa_set-'+fila+'-producto"]').closest('tr').find('td.field-importe').text(subtotal);
+        // calcular total
+        var total = 0;
+
+      });
+
+      
+</script>
 
 {% endif %}
 
