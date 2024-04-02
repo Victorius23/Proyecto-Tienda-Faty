@@ -4,5 +4,6 @@ datos.json
 usuario.json
 
 *.pyc
+*.*.pyc
 __pycache__
 db.sqlite3
