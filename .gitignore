@@ -1,4 +1,8 @@
 diagrama.drawio
 .env
 datos.json
+usuario.json
+
+*.pyc
+__pycache__
 db.sqlite3
