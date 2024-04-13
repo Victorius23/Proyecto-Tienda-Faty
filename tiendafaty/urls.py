@@ -19,12 +19,24 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include
-
+from django.contrib.auth import views as auth_views
 admin.site.site_header = 'Tienda Faty'
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    #reset password
+    path('reset_password/', auth_views.PasswordResetView.as_view(), name='reset_password'),
+    #reset password send
+    path('reset_password_send/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    #reset password <uidb64>/<token>
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    #reset password complete con un boton para redirigir a login
+    path('reset_password_complete/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    
+   
     path('api/', include('control_ventas.routers')),
     path('api/', include('control_productos.routers')),
+    
+    
 ] 

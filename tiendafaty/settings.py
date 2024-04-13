@@ -41,9 +41,13 @@ DJANGO_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    
+    
 ]
 
-THIRD_PARTY_APPS = ["rest_framework"]
+THIRD_PARTY_APPS = [
+    "rest_framework",
+    ]
 
 LOCAL_APPS = [
     "control_productos",
@@ -148,3 +152,18 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+#configuracion de email
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+EMAIL_HOST = "smtp.gmail.com"
+#EMAIL_HOST = "localhost"
+EMAIL_PORT = 587
+#EMAIL_PORT = 1025
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "tiendafaty@gmail.com"
+EMAIL_HOST_PASSWORD = "amunvxnzvdewwlko"
+
+
+
