@@ -1,0 +1,134 @@
+[
+  {
+    "model": "control_productos.producto",
+    "pk": 1,
+    "fields": {
+      "nombre": "Chetos Naranja",
+      "precioventa": "12.00",
+      "preciocompra": "11.00",
+      "descripcion": "",
+      "categoria": 2,
+      "proveedor": 1
+    }
+  },
+  {
+    "model": "control_productos.producto",
+    "pk": 2,
+    "fields": {
+      "nombre": "Cubrebocas",
+      "precioventa": "8.00",
+      "preciocompra": "5.00",
+      "descripcion": "",
+      "categoria": 1,
+      "proveedor": 3
+    }
+  },
+  {
+    "model": "control_productos.producto",
+    "pk": 3,
+    "fields": {
+      "nombre": "Lapicero Negro",
+      "precioventa": "7.50",
+      "preciocompra": "5.00",
+      "descripcion": "",
+      "categoria": 4,
+      "proveedor": 5
+    }
+  },
+  {
+    "model": "control_productos.producto",
+    "pk": 4,
+    "fields": {
+      "nombre": "Quesillo",
+      "precioventa": "120.00",
+      "preciocompra": "80.00",
+      "descripcion": "",
+      "categoria": 3,
+      "proveedor": 5
+    }
+  },
+  {
+    "model": "control_productos.producto",
+    "pk": 5,
+    "fields": {
+      "nombre": "Aliviax",
+      "precioventa": "12.00",
+      "preciocompra": "6.00",
+      "descripcion": "",
+      "categoria": 1,
+      "proveedor": 4
+    }
+  },
+  {
+    "model": "control_productos.producto",
+    "pk": 6,
+    "fields": {
+      "nombre": "Chetos Flaming Hot",
+      "precioventa": "12.00",
+      "preciocompra": "10.00",
+      "descripcion": "",
+      "categoria": 2,
+      "proveedor": 1
+    }
+  },
+  {
+    "model": "control_productos.producto",
+    "pk": 7,
+    "fields": {
+      "nombre": "Takis Fuego",
+      "precioventa": "16.00",
+      "preciocompra": "10.00",
+      "descripcion": "",
+      "categoria": 2,
+      "proveedor": 2
+    }
+  },
+  {
+    "model": "control_productos.producto",
+    "pk": 8,
+    "fields": {
+      "nombre": "Libreta",
+      "precioventa": "20.00",
+      "preciocompra": "14.00",
+      "descripcion": "",
+      "categoria": 4,
+      "proveedor": 5
+    }
+  },
+  {
+    "model": "control_productos.producto",
+    "pk": 9,
+    "fields": {
+      "nombre": "Jamon",
+      "precioventa": "120.00",
+      "preciocompra": "80.00",
+      "descripcion": "",
+      "categoria": 3,
+      "proveedor": 4
+    }
+  },
+  {
+    "model": "control_productos.producto",
+    "pk": 10,
+    "fields": {
+      "nombre": "Flanax 500mg",
+      "precioventa": "12.00",
+      "preciocompra": "6.00",
+      "descripcion": "",
+      "categoria": 1,
+      "proveedor": 2
+    }
+  },
+  {
+    "model": "control_productos.producto",
+    "pk": 11,
+    "fields": {
+      "nombre": "Doritos Rojos",
+      "precioventa": "15.00",
+      "preciocompra": "12.00",
+      "descripcion": "",
+      "categoria": 2,
+      "proveedor": 1
+    }
+  }
+]
