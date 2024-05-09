@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from django.utils.translation import gettext_lazy as _
 
 load_dotenv()
 
@@ -35,19 +36,37 @@ ALLOWED_HOSTS = []
 # Application definition
 
 DJANGO_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    
-    
 ]
+
+JAZZMIN_SETTINGS = {
+    "site_logo": "img/TiendaF.png",
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "control_compras.Compra": "fas fa-shopping-cart",
+        "control_inventario.Inventario": "fas fa-boxes",
+        "control_productos.Producto": "fas fa-box",
+        "control_ventas.Venta": "fas fa-shopping-basket",
+        "control_productos.Proveedor": "fas fa-truck",
+        "control_productos.Categoria": "fas fa-tags",
+        # mensaje del admin logout
+    },
+    "logout_message": _("¡Hasta pronto! Has cerrado la sesión."),  # Add the logout message here
+}
+
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 THIRD_PARTY_APPS = [
     "rest_framework",
-    ]
+]
 
 LOCAL_APPS = [
     "control_productos",
@@ -55,6 +74,7 @@ LOCAL_APPS = [
     "control_compras",
     "control_inventario",
 ]
+
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -153,17 +173,14 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-#configuracion de email
+# configuracion de email
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 EMAIL_HOST = "smtp.gmail.com"
-#EMAIL_HOST = "localhost"
+# EMAIL_HOST = "localhost"
 EMAIL_PORT = 587
-#EMAIL_PORT = 1025
+# EMAIL_PORT = 1025
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "tiendafaty@gmail.com"
 EMAIL_HOST_PASSWORD = "amunvxnzvdewwlko"
-
-
-
