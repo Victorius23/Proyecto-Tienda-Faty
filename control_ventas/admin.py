@@ -84,3 +84,5 @@ class VentaAdmin(admin.ModelAdmin):
         
     
 admin.site.register(Venta, VentaAdmin)
+
+
