@@ -59,7 +59,7 @@ JAZZMIN_SETTINGS = {
         "control_productos.Categoria": "fas fa-tags",
         # mensaje del admin logout
     },
-    "logout_message": _("¡Hasta pronto! Has cerrado la sesión."),  # Add the logout message here
+    "changeform_format": "horizontal_tabs",
 }
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
