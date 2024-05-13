@@ -20,6 +20,7 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 {% get_side_menu using="app_list" as dashboard_list %}
 {% if dashboard_list %}
@@ -31,32 +32,47 @@
         <div class="col-md-6 col-sm-12">
             <div class="card">
                 <div id="main" style="width: 600px;height:400px;"></div>
-                <script type="text/javascript">
-                    // Initialize the echarts instance based on the prepared dom
-                    var myChart = echarts.init(document.getElementById('main'));
-
-                    // Specify the configuration items and data for the chart
-                    var option = {
-                        title: {
-                            text: 'ECharts Getting Started Example'
-                        },
-                        tooltip: {},
-                        legend: {
-                            data: ['sales']
-                        },
-                        xAxis: {
-                            data: ['Shirts', 'Cardigans', 'Chiffons', 'Pants', 'Heels', 'Socks']
-                        },
-                        yAxis: {},
-                        series: [{
-                            name: 'sales',
-                            type: 'bar',
-                            data: [5, 20, 36, 10, 10, 20]
-                        }]
-                    };
-
-                    // Display the chart using the configuration items and data just specified.
-                    myChart.setOption(option);
+                <script>
+                    // Realizar solicitud AJAX a la API para obtener los datos
+                    $(document).ready(function () {
+                        $.ajax({
+                            url: "{% url 'control_inventario:cantidad_stock' %}",
+                            type: 'GET',
+                            success: function (response) {
+                                console.log(response);
+                                var productos = response.map(item => item.producto);
+                                var cantidadesStock = response.map(item => item.cantidad_stock);
+                                
+                                var myChart = echarts.init(document.getElementById('main'));
+                                var option = {
+                                    title: {
+                                        text: 'Cantidad en Stock'
+                                    },
+                                    tooltip: {},
+                                    xAxis: {
+                                        data: productos,
+                                        axisLabel: {
+                                            rotate: 38, // Ajusta el ángulo de rotación según sea necesario
+                                            interval: 0, // Muestra todas las etiquetas
+                                            textStyle: {
+                                                fontSize: 10 // Ajusta el tamaño de la fuente si es necesario
+                                            }
+                                        }
+                                    },
+                                    yAxis: {},
+                                    series: [{
+                                        name: 'Cantidad Stock',
+                                        type: 'bar',
+                                        data: cantidadesStock
+                                    }]
+                                };
+                                myChart.setOption(option);
+                            },
+                            error: function (error) {
+                                console.error('Error al obtener datos:', error);
+                            }
+                        });
+                    });
                 </script>
             </div>
         </div>
