@@ -1,5 +1,6 @@
 from django.db import models
 from django.dispatch import receiver
+from .managers import InventariosManager
 
 # Create your models here.
 
@@ -7,6 +8,9 @@ from control_productos.models import Producto
 
 
 class Inventario(models.Model):
+    
+    objects = InventariosManager()
+    
     producto = models.OneToOneField(Producto, on_delete=models.CASCADE, related_name='inventario')
     cantidad_stock = models.PositiveIntegerField()
     ultima_actualizacion = models.DateTimeField(auto_now=True)
