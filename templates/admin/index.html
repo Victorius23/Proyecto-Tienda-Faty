@@ -16,6 +16,7 @@
 
 
 {% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 
 
@@ -70,6 +71,17 @@
                     // Initialize the echarts instance based on the prepared dom
                     var myChart2 = echarts.init(document.getElementById('main2'));
 
+                    var productos;
+
+                    $.ajax({
+                        url: "{% url 'control_ventas:productos_mas_vendidos' %}",
+                        type: 'GET',
+                        success: function (response) {
+                            console.log(response);
+                            productos = response.productos;
+                        }
+                    });
+
                     // Specify the configuration items and data for the chart
                     var option2 = {
                         tooltip: {
@@ -80,7 +92,7 @@
                             left: 'center'
                         },
                         series: [{
-                            name: 'Access From',
+                            name: 'Productos más venidos del mes',
                             type: 'pie',
                             radius: ['40%', '70%'],
                             avoidLabelOverlap: false,
@@ -237,7 +249,6 @@
 
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <script>
     $(document).ready(function () {
