@@ -60,6 +60,11 @@ JAZZMIN_SETTINGS = {
         # mensaje del admin logout
     },
     "changeform_format": "horizontal_tabs",
+    #oculta el footer
+    "show_ui_builder": False,
+
+    
+
 }
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]

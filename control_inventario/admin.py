@@ -4,6 +4,9 @@ from django.contrib import admin
 
 from .models import Inventario
 
+#importe de la clase Sum
+from django.db.models import Sum
+
 
 
 #clase
@@ -15,8 +18,6 @@ class InventarioAdmin(admin.ModelAdmin):
 
 
 
-
 admin.site.register(Inventario, InventarioAdmin)
 
-
-
+    
