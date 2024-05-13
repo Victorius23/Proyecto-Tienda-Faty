@@ -57,4 +57,5 @@ urlpatterns = [
     path("api/", include("control_productos.routers")),
 
     path("api/", include("control_ventas.urls")),
+    path("api/", include("control_inventario.urls")),
 ]
