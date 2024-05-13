@@ -17,6 +17,8 @@
 
 {% block content %}
 
+
+
 <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
 
     {% get_side_menu using="app_list" as dashboard_list %}
@@ -132,38 +134,13 @@
         <div class="row" >
             <div class="col-md-6 col-sm-12">
                     <div class="card" >
-                        <div id="main3" style="width: 600px;height:400px;"></div>
-                            <script type="text/javascript">
-                                // Initialize the echarts instance based on the prepared dom
-                                var myChart3 = echarts.init(document.getElementById('main3'));
-
-                                // Specify the configuration items and data for the chart
-                                var option = {
-                                    title: {
-                                        text: 'ECharts Getting Started Example'
-                                    },
-                                    tooltip: {},
-                                    legend: {
-                                        data: ['sales']
-                                    },
-                                    xAxis: {
-                                        data: ['Shirts', 'Cardigans', 'Chiffons', 'Pants', 'Heels', 'Socks']
-                                    },
-                                    yAxis: {},
-                                    series: [
-                                        {
-                                            name: 'sales',
-                                            type: 'bar',
-                                            data: [5, 20, 36, 10, 10, 20]
-                                        }
-                                    ]
-                                };
-
-                                // Display the chart using the configuration items and data just specified.
-                                myChart3.setOption(option);
-                            </script>
-                        </div>
+                            <div id="main3" style="width: 590px;height:400px; background-color: #4CAF50; color: white; display: flex; justify-content: center; align-items: center;">
+                                <div style="font-size: 24px;">$</div>
+                                <div style="font-size: 48px;">1,200</div>
+                                <div style="font-size: 18px;">Total de ganancias</div>
+                            </div>
                     </div> 
+            </div>  
                 
                     
 
