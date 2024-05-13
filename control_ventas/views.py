@@ -18,3 +18,8 @@ class TotalVentasHoyApi(APIView):
     def get(self, request):
         total = Venta.objects.total_ventas_hoy()
         return Response({'total': total})
+    
+class ProductosMasVendidosApi(APIView):
+    def get(self, request):
+        productos = Venta.objects.productos_mas_vendidos()
+        return Response({'productos': productos})
