@@ -14,3 +14,5 @@ class VentaManager(models.Manager):
     def productos_mas_vendidos(self):
         return self.filter(fecha__date=date.today()).values('detalles__producto__nombre').annotate(
             total=Sum('detalles__cantidad')).order_by('-total')[:5]
+        
+        

@@ -22,6 +22,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
 
 {% get_side_menu using="app_list" as dashboard_list %}
 {% if dashboard_list %}
@@ -189,93 +192,68 @@
 
         <div class="col-md-6 col-sm-12">
             <div class="card">
-                <div id="main4" style="width: 600px;height:400px;"></div>
-                <script type="text/javascript">
-                    $.get(
-                        ROOT_PATH + '/data/asset/data/life-expectancy-table.json',
-                        function (_rawData) {
-                          run(_rawData);
+                <canvas id="multiAxisChart" style="width: 800px; height: 550px;"></canvas>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const ctx = document.getElementById('multiAxisChart');
+                        if (ctx) { // Verifica si el elemento canvas existe
+                            const data = {
+                                labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo'],
+                                datasets: [{
+                                    label: 'Ventas',
+                                    data: [100, 150, 120, 200, 180],
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    yAxisID: 'y1',
+                                }, {
+                                    label: 'Ganancias',
+                                    data: [2000, 1800, 2200, 2500, 2300],
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    yAxisID: 'y2',
+                                }]
+                            };
+        
+                            const config = {
+                                type: 'line',
+                                data: data,
+                                options: {
+                                    responsive: true,
+                                    interaction: {
+                                        mode: 'index',
+                                        intersect: false,
+                                    },
+                                    stacked: false,
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: 'Chart.js Line Chart - Multi Axis'
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            type: 'linear',
+                                            display: true,
+                                            position: 'left',
+                                            id: 'y1',
+                                        },
+                                        y1: {
+                                            type: 'linear',
+                                            display: true,
+                                            position: 'right',
+                                            grid: {
+                                                drawOnChartArea: false,
+                                            },
+                                            id: 'y2',
+                                        },
+                                    }
+                                },
+                            };
+        
+                            new Chart(ctx, config);
+                        } else {
+                            console.error('Elemento canvas no encontrado.');
                         }
-                      );
-                      function run(_rawData) {
-                        option = {
-                          dataset: [
-                            {
-                              id: 'dataset_raw',
-                              source: _rawData
-                            },
-                            {
-                              id: 'dataset_since_1950_of_germany',
-                              fromDatasetId: 'dataset_raw',
-                              transform: {
-                                type: 'filter',
-                                config: {
-                                  and: [
-                                    { dimension: 'Year', gte: 1950 },
-                                    { dimension: 'Country', '=': 'Germany' }
-                                  ]
-                                }
-                              }
-                            },
-                            {
-                              id: 'dataset_since_1950_of_france',
-                              fromDatasetId: 'dataset_raw',
-                              transform: {
-                                type: 'filter',
-                                config: {
-                                  and: [
-                                    { dimension: 'Year', gte: 1950 },
-                                    { dimension: 'Country', '=': 'France' }
-                                  ]
-                                }
-                              }
-                            }
-                          ],
-                          title: {
-                            text: 'Income of Germany and France since 1950'
-                          },
-                          tooltip: {
-                            trigger: 'axis'
-                          },
-                          xAxis: {
-                            type: 'category',
-                            nameLocation: 'middle'
-                          },
-                          yAxis: {
-                            name: 'Income'
-                          },
-                          series: [
-                            {
-                              type: 'line',
-                              datasetId: 'dataset_since_1950_of_germany',
-                              showSymbol: false,
-                              encode: {
-                                x: 'Year',
-                                y: 'Income',
-                                itemName: 'Year',
-                                tooltip: ['Income']
-                              }
-                            },
-                            {
-                              type: 'line',
-                              datasetId: 'dataset_since_1950_of_france',
-                              showSymbol: false,
-                              encode: {
-                                x: 'Year',
-                                y: 'Income',
-                                itemName: 'Year',
-                                tooltip: ['Income']
-                              }
-                            }
-                          ]
-                        };
-                        myChart4.setOption(option4);
-                    }
-
-                    // Display the chart using the configuration items and data just specified.
-                    
+                    });
                 </script>
-
             </div>
         </div>
 
