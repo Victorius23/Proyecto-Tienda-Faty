@@ -1,0 +1,337 @@
+{% load i18n admin_urls static admin_modify %}
+<div class="js-inline-admin-formset inline-group" id="{{ inline_admin_formset.formset.prefix }}-group"
+  data-inline-type="tabular" data-inline-formset="{{ inline_admin_formset.inline_formset_data }}">
+  <div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">
+    {{ inline_admin_formset.formset.management_form }}
+    <fieldset class="module {{ inline_admin_formset.classes }}">
+      {% if inline_admin_formset.formset.max_num == 1 %}
+      <h2>{{ inline_admin_formset.opts.verbose_name|capfirst }}</h2>
+      {% else %}
+      <h2>{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</h2>
+      {% endif %}
+      {{ inline_admin_formset.formset.non_form_errors }}
+
+      {% if app_label == 'control_ventas' %}
+      {% comment %} select categorias {% endcomment %}
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+      <div class="">
+        <select name="categoria" id="id_categoria">
+          <option value="">Categoria</option>
+
+        </select>
+      </div>
+
+      <script>
+        $(document).ready(function () {
+
+          // hacer que el id id_detalles-__prefix__-cantidad sea readonly
+          $('#id_detalles-__prefix__-cantidad').prop('readonly', true);
+
+          if ($('select[name$="producto"]').val() == "") {
+            var numero_fila = $('select[name$="producto"]').attr('name').split('-')[1];
+
+            // obtener el input de la cantidad de la misma fila y hacer que sea readonly
+            var cantidad = $('input[name="detalles-' + numero_fila + '-cantidad"]').prop('readonly', true);
+          }
+
+          // agregar un span al lado de "tabular inline-related last-related" que diga "total"
+          var totalSpan = $('<span id="totalventa">Total: $0.00</span>');
+          $('.tabular.inline-related.last-related').after(totalSpan);
+          // hacer que el texto aparezca pegado al borde derecho
+          totalSpan.css('float', 'right');
+          // agregar 50% de margen a la derecha
+          totalSpan.css('margin-right', '20%');
+
+          var readonlyDiv = $('.form-group.field-fecha .readonly');
+          readonlyDiv.text(new Date().toLocaleDateString());
+
+          // agregar columna de el usuario logueado abajo de la fecha class="flex-container"
+          //  si hay objeto "obj" en el contexto de la vista no mostrar lo de abajo
+          // {% if  original %}
+
+
+          // {% else %}
+          var userDiv = $(
+            '<div class="form-group field-empleado"><div class="row"><label class="col-sm-3 text-left" for="id_empleado">Empleado:</label><div class="col-sm-7 field-empleado"><div class="readonly">{{ user }}</div></div></div></div>'
+          );
+          $('.form-group.field-fecha').after(userDiv);
+          // {% endif %}
+
+          // agregar columna de precio
+          $('th.column-cantidad').after('<th class="column-precio">Precio</th>');
+          $('td.field-cantidad').after('<td class="field-precio">-</td>');
+
+          $.ajax({
+            url: "/api/categorias/",
+            type: 'get',
+            dataType: 'json',
+            success: function (response) {
+              var len = response.length;
+              for (var i = 0; i < len; i++) {
+                var id = response[i].id;
+                var name = response[i].nombre;
+                var option = "<option value='" + id + "'>" + name + "</option>";
+                $("#id_categoria").append(option);
+              }
+            }
+          });
+
+          // si hay un producto seleccionado, obtener el precio y mostrarlo en la columna precio
+          $('select[name$="producto"]').each(function () {
+            var producto_id = $(this).val();
+            var fila = $(this).attr('name');
+            fila = fila.split('-')[1];
+            if (producto_id == "") {
+              return;
+            }
+            $.ajax({
+              url: "/api/productos/" + producto_id + "/",
+              type: 'get',
+              dataType: 'json',
+              data: {
+                producto: producto_id
+              },
+              success: function (response) {
+                var precio = response.precioventa;
+
+                $('select[name^="detalles-' + fila + '-producto"]').closest('tr').find('td.field-precio')
+                  .text(precio);
+                $('select[name^="detalles-' + fila + '-producto"]').closest('tr').find('td.field-importe')
+                  .text(precio * $('select[name^="detalles-' + fila + '-producto"]').closest('tr').find(
+                    'input[name$="cantidad"]').val());
+
+                // calcular total
+                var total = 0;
+                $('td.field-importe').each(function () {
+                  var importeText = $(this).text().trim();
+                  if (importeText && !importeText.includes('-')) {
+                    total += parseFloat(importeText);
+                  }
+                });
+                $('#totalventa').text('Total: $' + total.toFixed(2));
+              }
+            });
+          });
+        });
+
+
+        // cuando se seleccione una categoria actualizar el select de productos
+        $(document).on('change', '#id_categoria', function () {
+          var categoria_id = $(this).val();
+          var url_api = "/api/productos_categoria/";
+          if (categoria_id == "") {
+            url_api = "/api/productos/";
+            console.log('categoria vacia');
+          }
+
+          console.log(categoria_id);
+          $.ajax({
+            url: url_api,
+            type: 'get',
+            dataType: 'json',
+            data: {
+              categoria: categoria_id
+            },
+            success: function (response) {
+              $('select[name$=producto]').each(function () {
+                // Verificar si el select ya tiene opciones
+                if ($(this).val() != "") {
+                  return; // Si ya tiene opciones, salir del bucle para este select
+                }
+
+                // Limpiar opciones existentes y agregar la opción por defecto
+                $(this).find('option').remove().end().append('<option value="">---------</option>');
+
+                // Agregar opciones del response
+                for (var i = 0; i < response.length; i++) {
+                  var id = response[i].id;
+                  var name = response[i].nombre;
+                  var option = "<option value='" + id + "'>" + name + "</option>";
+                  $(this).append(option);
+                }
+              });
+
+            }
+          });
+
+
+        });
+      </script>
+
+
+
+      {% endif %}
+
+      <table>
+        <thead>
+          <tr>
+            <th class="original"></th>
+            {% for field in inline_admin_formset.fields %}
+            <th
+              class="column-{{ field.name }}{% if field.required %} required{% endif %}{% if field.widget.is_hidden %} hidden{% endif %}">
+              {{ field.label|capfirst }}
+              {% if field.help_text %}<img src="{% static "admin/img/icon-unknown.svg" %}" class="help help-tooltip"
+                width="10" height="10" alt="({{ field.help_text|striptags }})"
+                title="{{ field.help_text|striptags }}">{% endif %}
+            </th>
+            {% endfor %}
+            {% if inline_admin_formset.formset.can_delete and inline_admin_formset.has_delete_permission %}<th>
+              {% translate "Delete?" %}</th>{% endif %}
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for inline_admin_form in inline_admin_formset %}
+          {% if inline_admin_form.form.non_field_errors %}
+          <tr class="row-form-errors">
+            <td colspan="{{ inline_admin_form|cell_count }}">{{ inline_admin_form.form.non_field_errors }}</td>
+          </tr>
+          {% endif %}
+          <tr
+            class="form-row {% if inline_admin_form.original or inline_admin_form.show_url %}has_original{% endif %}{% if forloop.last and inline_admin_formset.has_add_permission %} empty-form{% endif %}"
+            id="{{ inline_admin_formset.formset.prefix }}-{% if forloop.last and inline_admin_formset.has_add_permission %}empty{% else %}{{ forloop.counter0 }}{% endif %}">
+            <td class="original">
+              {% if inline_admin_form.original or inline_admin_form.show_url %}<p>
+                {% if inline_admin_form.original %}
+                {{ inline_admin_form.original }}
+                {% if inline_admin_form.model_admin.show_change_link and inline_admin_form.model_admin.has_registered_model %}<a
+                  href="{% url inline_admin_form.model_admin.opts|admin_urlname:'change' inline_admin_form.original.pk|admin_urlquote %}"
+                  class="{{ inline_admin_formset.has_change_permission|yesno:'inlinechangelink,inlineviewlink' }}">{% if inline_admin_formset.has_change_permission %}{% translate "Change" %}{% else %}{% translate "View" %}{% endif %}</a>{% endif %}
+                {% endif %}
+                {% if inline_admin_form.show_url %}<a
+                  href="{{ inline_admin_form.absolute_url }}">{% translate "View on site" %}</a>{% endif %}
+              </p>{% endif %}
+              {% if inline_admin_form.needs_explicit_pk_field %}{{ inline_admin_form.pk_field.field }}{% endif %}
+              {% if inline_admin_form.fk_field %}{{ inline_admin_form.fk_field.field }}{% endif %}
+            </td>
+            {% for fieldset in inline_admin_form %}
+            {% for line in fieldset %}
+            {% for field in line %}
+            <td
+              class="{% if field.field.name %}field-{{ field.field.name }}{% endif %}{% if field.field.is_hidden %} hidden{% endif %}">
+              {% if field.is_readonly %}
+              <p>{{ field.contents }}</p>
+              {% else %}
+              {{ field.field.errors.as_ul }}
+              {{ field.field }}
+              {% endif %}
+            </td>
+            {% endfor %}
+            {% endfor %}
+            {% endfor %}
+            {% if inline_admin_formset.formset.can_delete and inline_admin_formset.has_delete_permission %}
+            <td class="delete">
+              {% if inline_admin_form.original %}{{ inline_admin_form.deletion_field.field }}{% endif %}</td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </fieldset>
+  </div>
+</div>
+
+{% comment %} importar jquery
+{% endcomment %}
+
+
+{% comment %} si la aplicación se llama "control_ventas" {% endcomment %}
+
+{% if app_label == 'control_ventas' %}
+
+<script type="text/javascript">
+  // cuando se seleccione un valor de "name=detalles-x-producto" se agrega una columna con el precio del producto
+  $(document).on('change', 'select[name$=producto]', function () {
+    console.log('cambio');
+    var producto_id = $(this).val();
+    console.log(producto_id);
+    var fila = $(this).attr('name');
+    fila = fila.split('-')[1];
+    if (producto_id == "") {
+      // restar al total
+      var total = 0;
+      //obtener total actual
+      var total = parseFloat($('#totalventa').text().split('$')[1]);
+      // restar el importe de la fila
+      var importe = parseFloat($('select[name^="detalles-' + fila + '-producto"]').closest('tr').find(
+        'td.field-importe').text());
+      total -= importe;
+      // si no se ha seleccionado un producto, borrar el texto de la columna precio
+      $('select[name^="detalles-' + fila + '-producto"]').closest('tr').find('td.field-precio').text('-');
+      $('select[name^="detalles-' + fila + '-producto"]').closest('tr').find('td.field-importe').text('-');
+      $('select[name^="detalles-' + fila + '-producto"]').closest('tr').find('input[name$=cantidad]').val('');
+      // read only cantidad
+      $('select[name^="detalles-' + fila + '-producto"]').closest('tr').find('input[name$=cantidad]').attr(
+        'readonly', true);
+      // total a 0
+      $('#totalventa').text('Total: $' + total.toFixed(2));
+      // cantidad a 0
+      return;
+    }
+    // quitar readonly
+    $('select[name^="detalles-' + fila + '-producto"]').closest('tr').find('input[name$=cantidad]').attr('readonly',
+      false);
+    $.ajax({
+      url: "/api/productos/" + producto_id + "/",
+      type: 'get',
+      dataType: 'json',
+      data: {
+        producto: producto_id
+      },
+      success: function (response) {
+        // extraer x de name=detalles-x-producto
+
+        var precio = response.precioventa;
+        console.log("precio:" + precio);
+
+        $('select[name^="detalles-' + fila + '-producto"]').closest('tr').find('td.field-precio').text(
+          precio);
+        $('select[name^="detalles-' + fila + '-producto"]').closest('tr').find('td.field-importe').text(
+          precio * $('select[name^="detalles-' + fila + '-producto"]').closest('tr').find(
+            'input[name$=cantidad]').val());
+        // calcular total
+        var total = 0;
+        // todos menos el último
+        $('td.field-importe').each(function () {
+          console.log("dato: " + $(this).text());
+          // si tiene un en su texto un "-" no sumar
+          if ($(this).text().includes('-')) {
+            return;
+          }
+          total += parseFloat($(this).text());
+        });
+        $('#totalventa').text('Total: $' + total.toFixed(2));
+      }
+    });
+
+  });
+
+
+
+  // * cuando la cantidad cambie, actualizar el subtotal de la fila
+  $(document).on('change', 'input[name$=cantidad]', function () {
+    var cantidad = $(this).val();
+    var fila = $(this).attr('name');
+    fila = fila.split('-')[1];
+    var precio = $('select[name^="detalles-' + fila + '-producto"]').closest('tr').find('td.field-precio').text();
+    console.log(precio);
+    var subtotal = cantidad * precio;
+    $('select[name^="detalles-' + fila + '-producto"]').closest('tr').find('td.field-importe').text(subtotal);
+    // calcular total
+    var total = 0;
+    // todos menos el último
+    $('td.field-importe').each(function () {
+      console.log("dato: " + $(this).text());
+      // si tiene un en su texto un "-" no sumar
+      if ($(this).text().includes('-')) {
+        return;
+      }
+      total += parseFloat($(this).text());
+    });
+    $('#totalventa').text('Total: $' + total.toFixed(2));
+
+  });
+</script>
+
+{% endif %}
