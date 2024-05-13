@@ -14,10 +14,15 @@ from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.contrib import messages
 
+from .managers import VentaManager
+
 
 # Create your models here.
 
 class Venta(TimeStampedModel):
+    
+    objects = VentaManager()
+    
     cliente = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='compras', null=True, blank=True)
     empleado = models.ForeignKey(
