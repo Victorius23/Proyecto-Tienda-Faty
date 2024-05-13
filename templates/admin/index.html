@@ -1,0 +1,78 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static jazzmin %}
+{% get_jazzmin_ui_tweaks as jazzmin_ui %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block content_title %} {% trans 'Dashboard' %} {% endblock %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+    <li class="breadcrumb-item">{% trans 'Dashboard' %}</li>
+</ol>
+{% endblock %}
+
+
+{% block content %}
+<div class="col-lg-9 col-12">
+    <div class="row">
+        <div class="col-md-6 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="m-0">Autenticación y Autorización</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+
+                            <tr>
+                                <td>
+                                    <a href="/admin/auth/group/">Grupos</a>
+                                </td>
+                                <td>
+                                    <div class="btn-group float-right">
+
+                                        <a href="/admin/auth/group/add/"
+                                            class="btn btn-xs btn-success addlink">Agregar</a>
+
+
+
+                                        <a href="/admin/auth/group/"
+                                            class="btn btn-xs btn-info changelink">Modificar</a>
+
+
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <a href="/admin/auth/user/">Usuarios</a>
+                                </td>
+                                <td>
+                                    <div class="btn-group float-right">
+
+                                        <a href="/admin/auth/user/add/"
+                                            class="btn btn-xs btn-success addlink">Agregar</a>
+
+
+
+                                        <a href="/admin/auth/user/" class="btn btn-xs btn-info changelink">Modificar</a>
+
+
+                                    </div>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% get_side_menu using="app_list" as dashboard_list %}
+
+
+{% endblock %}
