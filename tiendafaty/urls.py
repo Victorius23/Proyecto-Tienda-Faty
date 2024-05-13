@@ -27,10 +27,10 @@ admin.site.site_header = "Tienda Faty"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    
-    
-    
-    
+
+
+
+
     # reset password
     path(
         "reset_password/", auth_views.PasswordResetView.as_view(), name="reset_password"
@@ -55,4 +55,6 @@ urlpatterns = [
     ),
     path("api/", include("control_ventas.routers")),
     path("api/", include("control_productos.routers")),
+
+    path("api/", include("control_ventas.urls")),
 ]
