@@ -78,6 +78,7 @@ LOCAL_APPS = [
     "control_ventas",
     "control_compras",
     "control_inventario",
+    "registration",
 ]
 
 

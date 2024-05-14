@@ -26,6 +26,8 @@
 
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js"></script>
+
 {% get_side_menu using="app_list" as dashboard_list %}
 {% if dashboard_list %}
 {% widthratio dashboard_list|length 2 1 as middle %}
@@ -88,14 +90,17 @@
                 <div id="main2" style="width: 600px;height:400px;"></div>
                 <script type="text/javascript">
                     var myChart2 = echarts.init(document.getElementById('main2'));
-                
+
                     $.ajax({
                         url: "{% url 'control_ventas:productos_mas_vendidos' %}",
                         type: 'GET',
                         success: function (response) {
                             console.log(response);
-                            var productos = response.map(item => ({ name: item.name, value: item.value }));
-                
+                            var productos = response.map(item => ({
+                                name: item.name,
+                                value: item.value
+                            }));
+
                             var option2 = {
                                 tooltip: {
                                     trigger: 'item'
@@ -131,7 +136,7 @@
                                     data: productos
                                 }]
                             };
-                
+
                             myChart2.setOption(option2);
                         },
                         error: function (error) {
@@ -139,8 +144,8 @@
                         }
                     });
                 </script>
-                
-                
+
+
 
             </div>
         </div>
@@ -172,68 +177,29 @@
 
         <div class="col-md-6 col-sm-12">
             <div class="card">
-                <canvas id="multiAxisChart" style="width: 800px; height: 550px;"></canvas>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const ctx = document.getElementById('multiAxisChart');
-                        if (ctx) { // Verifica si el elemento canvas existe
-                            const data = {
-                                labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo'],
-                                datasets: [{
-                                    label: 'Ventas',
-                                    data: [100, 150, 120, 200, 180],
-                                    borderColor: 'rgba(255, 99, 132, 1)',
-                                    yAxisID: 'y1',
-                                }, {
-                                    label: 'Ganancias',
-                                    data: [2000, 1800, 2200, 2500, 2300],
-                                    borderColor: 'rgba(54, 162, 235, 1)',
-                                    yAxisID: 'y2',
-                                }]
-                            };
-        
-                            const config = {
-                                type: 'line',
-                                data: data,
-                                options: {
-                                    responsive: true,
-                                    interaction: {
-                                        mode: 'index',
-                                        intersect: false,
-                                    },
-                                    stacked: false,
-                                    plugins: {
-                                        title: {
-                                            display: true,
-                                            text: 'Chart.js Line Chart - Multi Axis'
-                                        }
-                                    },
-                                    scales: {
-                                        y: {
-                                            type: 'linear',
-                                            display: true,
-                                            position: 'left',
-                                            id: 'y1',
-                                        },
-                                        y1: {
-                                            type: 'linear',
-                                            display: true,
-                                            position: 'right',
-                                            grid: {
-                                                drawOnChartArea: false,
-                                            },
-                                            id: 'y2',
-                                        },
-                                    }
-                                },
-                            };
-        
-                            new Chart(ctx, config);
-                        } else {
-                            console.error('Elemento canvas no encontrado.');
-                        }
-                    });
-                </script>
+                <div id="main3"
+                    style="width: 578px;height:400px; background-color: #4CAF50; color: white; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+
+                    <div style="font-size: 18px;">Empleado del mes:</div>
+
+                    <div style="font-size: 48px;" id="empleado_mes">
+                        {# Aquí se mostrará el nombre del empleado del mes #}
+
+                    </div>
+                    <script>
+                        $(document).ready(function () {
+                            $.ajax({
+                                url: "{% url 'registration:empleado_mas_ventas' %}",
+                                type: 'GET',
+                                success: function (response) {
+                                    console.log(response);
+                                    $('#empleado_mes').text(response.empleado + ' - ' + response
+                                        .ventas + ' ventas');
+                                }
+                            });
+                        });
+                    </script>
+                </div>
             </div>
         </div>
 

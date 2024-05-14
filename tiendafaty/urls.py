@@ -58,4 +58,6 @@ urlpatterns = [
 
     path("api/", include("control_ventas.urls")),
     path("api/", include("control_inventario.urls")),
+    
+    path("api/", include("registration.urls")),
 ]
