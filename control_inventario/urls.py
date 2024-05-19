@@ -8,6 +8,7 @@ app_name = 'control_inventario'
 urlpatterns = [
     # Otras URLs de tu aplicación...
     path('cantidad-stock/', views.CantidadStock.as_view(), name='cantidad_stock'),
+    path('cantidad-productos/', views.CantidadProductos.as_view(), name='cantidad_productos'),
 ]
 
 

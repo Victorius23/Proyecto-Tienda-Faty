@@ -1,6 +1,7 @@
 {% load i18n admin_urls static admin_modify %}
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 
 <div class="js-inline-admin-formset inline-group" id="{{ inline_admin_formset.formset.prefix }}-group"
@@ -376,7 +377,9 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn btn-primary" id="calcular-modal">Calcular Cambio</button>
-                <button type="submit" class="btn btn-success">Finalizar</button>
+                {% comment %} <button type="button" class="btn btn-primary" onclick="verificarExistencias()">Finalizar Venta</button> {% endcomment %}
+                <button type="submit" class="btn btn-primary" onclick="printTicket()">Finalizar Venta</button>
+
             </div>
         </div>
     </div>
@@ -385,7 +388,85 @@
 
 {% if app_label == 'control_ventas' %}
 
+
 <script>
+
+
+    // Función para verificar las existencias de los productos seleccionados
+    function verificarExistencias() {
+       //se obtiene el id del producto seleccionados para la venta
+        var productosSeleccionados = [];
+        var cantidadSeleccionada = [];
+        $('select[name$="producto"]').each(function () {
+            var productoSeleccionado = $(this).find('option:selected').text();
+            var cantidad = $(this).closest('tr').find('input[name$=cantidad]').val();
+            if (productoSeleccionado && productoSeleccionado !== '---------') {
+                productosSeleccionados.push(productoSeleccionado);
+                cantidadSeleccionada.push(cantidad);
+            }
+        });
+        //se recorre el array de productos seleccionados
+        for (var i = 0; i < productosSeleccionados.length; i++) {
+            var producto = productosSeleccionados[i];
+            var cantidad = cantidadSeleccionada[i];
+            //se obtiene el id del producto seleccionado
+            var producto_id = $('select[name$="producto"]').find('option:selected').val();
+
+            
+        }
+
+
+    
+
+
+    }
+
+    
+
+    //fuccion para imprimir el ticket de la venta por medio de la impresora que este conectada
+            //la impresora es una EPSON L5190 Series 
+
+    function printTicket() {
+        var productosSeleccionados = [];
+        var preciosSeleccionados = [];
+        var cantidadSeleccionada = [];
+        var total = 0;
+        $('select[name$="producto"]').each(function () {
+            var productoSeleccionado = $(this).find('option:selected').text();
+            var precioSeleccionado = $(this).closest('tr').find('.field-precio').text();
+            var cantidad = $(this).closest('tr').find('input[name$=cantidad]').val();
+            if (productoSeleccionado && productoSeleccionado !== '---------') {
+                productosSeleccionados.push(productoSeleccionado);
+                preciosSeleccionados.push(precioSeleccionado);
+                cantidadSeleccionada.push(cantidad);
+                total += parseFloat(precioSeleccionado) * parseFloat(cantidad);
+            }
+        });
+        var ticket = '<h1>Ticket de Venta</h1>';
+        ticket += '<p>Fecha: ' + new Date().toLocaleDateString() + '</p>';
+        ticket += '<p>Productos:</p>';
+        ticket += '<ul>';
+        for (var i = 0; i < productosSeleccionados.length; i++) {
+            var producto = productosSeleccionados[i];
+            var precio = preciosSeleccionados[i];
+            var cantidad = cantidadSeleccionada[i];
+            ticket += '<li>' + producto + ' - $' + precio + ' - Cantidad: ' + cantidad + '</li>';
+        }
+        ticket += '</ul>';
+        ticket += '<p>Total: $' + total.toFixed(2) + '</p>';
+        ticket += '<p>Gracias por su compra</p>';
+        var mywindow = window.open('', 'PRINT', 'height=400,width=600');
+        mywindow.document.write('<html><head><title>' + document.title + '</title>');
+        mywindow.document.write('</head><body>');
+        mywindow.document.write(ticket);
+        mywindow.document.write('</body></html>');
+        mywindow.document.close(); // necessary for IE >= 10
+        mywindow.focus(); // necessary for IE >= 10
+        mywindow.print();
+        mywindow.close();
+    }
+    
+
    
     
     // Controlador de eventos para cambios en la tabla
@@ -433,45 +514,49 @@ $(document).on('change', 'select[name$="producto"], input[name$="cantidad"]', fu
         });
     
        // Controlador de eventos click para el botón "Realizar venta"
-$('input[type="submit"]').click(function (e) {
-    if ($(this).val() == 'Realizar venta') {
-        var productosSeleccionados = [];
-        var preciosSeleccionados = [];
-        var cantidadSeleccionada = [];
-        $('select[name$="producto"]').each(function () {
-            var productoSeleccionado = $(this).find('option:selected').text();
-            var precioSeleccionado = $(this).closest('tr').find('.field-precio').text();
-            var cantidad = $(this).closest('tr').find('input[name$=cantidad]').val();
-            if (productoSeleccionado && productoSeleccionado !== '---------') {
-                productosSeleccionados.push(productoSeleccionado);
-                preciosSeleccionados.push(precioSeleccionado);
-                cantidadSeleccionada.push(cantidad);
-            }
-        });
-        if (productosSeleccionados.length === 0) {
-            e.preventDefault();
-            Swal.fire({
-                title: 'Error',
-                text: 'No se puede realizar una venta sin productos',
-                icon: 'error',
-                confirmButtonText: 'Aceptar'
+    $('input[type="submit"]').click(function (e) {
+        if ($(this).val() == 'Realizar venta') {
+            var productosSeleccionados = [];
+            var preciosSeleccionados = [];
+            var cantidadSeleccionada = [];
+            $('select[name$="producto"]').each(function () {
+                var productoSeleccionado = $(this).find('option:selected').text();
+                var precioSeleccionado = $(this).closest('tr').find('.field-precio').text();
+                var cantidad = $(this).closest('tr').find('input[name$=cantidad]').val();
+                if (productoSeleccionado && productoSeleccionado !== '---------') {
+                    productosSeleccionados.push(productoSeleccionado);
+                    preciosSeleccionados.push(precioSeleccionado);
+                    cantidadSeleccionada.push(cantidad);
+                }
             });
-        } else {
-            e.preventDefault();
-            var total = parseFloat($('#totalventa').text().split('$')[1]);
-            $('#modal-totalventa').text('$' + total.toFixed(2));
-            $('#productos-seleccionados').empty();
-            for (var i = 0; i < productosSeleccionados.length; i++) {
-                var producto = productosSeleccionados[i];
-                var precio = preciosSeleccionados[i];
-                var cantidad = cantidadSeleccionada[i];
-                var li = '<li>' + producto + ' - $' + precio + ' - Cantidad: ' + cantidad + '</li>';
-                $('#productos-seleccionados').append(li);
+            if (productosSeleccionados.length === 0) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se puede realizar una venta sin productos',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+            } else {
+                e.preventDefault();
+                var total = parseFloat($('#totalventa').text().split('$')[1]);
+                $('#modal-totalventa').text('$' + total.toFixed(2));
+                $('#productos-seleccionados').empty();
+                for (var i = 0; i < productosSeleccionados.length; i++) {
+                    var producto = productosSeleccionados[i];
+                    var precio = preciosSeleccionados[i];
+                    var cantidad = cantidadSeleccionada[i];
+                    var li = '<li>' + producto + ' - $' + precio + ' - Cantidad: ' + cantidad + '</li>';
+                    $('#productos-seleccionados').append(li);
+                }
+                $('#modal-venta').modal('show');
+
+                
             }
-            $('#modal-venta').modal('show');
         }
-    }
-});
+    });
+
+
 
     
         // Controlador de eventos click para el botón "Calcular Cambio"
