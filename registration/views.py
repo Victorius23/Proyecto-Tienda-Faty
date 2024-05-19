@@ -14,12 +14,17 @@ from rest_framework.response import Response
 from django.db.models import Count
 
 
-from django.db.models import Count
-
-class EmpleadoMasVentas(APIView):
+class VentaPorEmpleado(APIView):
     def get(self, request):
-        # * obtener el empleado con mas ventas
-        empleado = User.objects.filter(is_staff=True).annotate(total_ventas=Count('ventas')).order_by('-total_ventas').first()
+        # * conseguir los empleados y sus ventas
+        empleados = User.objects.filter(is_staff=True).annotate(
+            total=Count('ventas')).order_by('-total')
+        data = [{'empleado': empleado.username, 'ventas': empleado.total}
+                for empleado in empleados]
+        return Response(data)
 
-        return Response({'empleado': empleado.username, 'ventas': empleado.total_ventas})
-
+class UsuarioRegistrado(APIView):
+    def get(self, request):
+        usuarios = User.objects.count()
+        return Response({'usuarios': usuarios})
+    

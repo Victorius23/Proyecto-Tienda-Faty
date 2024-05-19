@@ -62,15 +62,12 @@ admin.site.register(Proveedor, ProveedorAdmin)
 
 #cuadro del historial de productos
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ("nombre", "precioventa", "preciocompra", "categoria", "proveedor")
+    list_display = ("nombre", "precioventa", "preciocompra", "categoria", "proveedor","imagen_producto")
     search_fields = ("nombre", "categoria__nombre", "proveedor__nombre")
     list_filter = ("categoria", "proveedor")
+    
 
-    def get_readonly_fields(self, request, obj=None):
-        if obj:
-            return ("nombre", "precioventa", "preciocompra", "categoria", "proveedor")
-        else:
-            return ()
+
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
@@ -85,6 +82,8 @@ class ProductoAdmin(admin.ModelAdmin):
                             "preciocompra",
                             "categoria",
                             "proveedor",
+                            "imagen_producto",
+                            "descripcion"
                         ),
                     },
                 )
@@ -92,3 +91,5 @@ class ProductoAdmin(admin.ModelAdmin):
         return fieldsets
 
 admin.site.register(Producto, ProductoAdmin)
+
+

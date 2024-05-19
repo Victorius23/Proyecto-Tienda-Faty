@@ -34,6 +34,7 @@ class Producto(models.Model):
     descripcion = models.TextField(null=True, blank=True)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
     proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
+    imagen_producto = models.ImageField(upload_to='productos', null=True, blank=True)
 
     def __str__(self):
         return self.nombre

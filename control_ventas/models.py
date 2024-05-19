@@ -16,7 +16,6 @@ from django.contrib import messages
 
 from .managers import VentaManager
 
-
 # Create your models here.
 
 class Venta(TimeStampedModel):
@@ -64,7 +63,9 @@ class DetalleVenta(TimeStampedModel):
         Venta, on_delete=models.CASCADE, related_name='detalles')
     producto = models.ForeignKey(
         Producto, on_delete=models.CASCADE, related_name='detalles')
-    cantidad = models.PositiveIntegerField()
+    #cantidad permitir decimales
+    cantidad = models.DecimalField(
+        max_digits=10, decimal_places=2, verbose_name='Cantidad')
     importe = models.DecimalField(
         max_digits=10, decimal_places=2, verbose_name='Subtotal', null=True, blank=True)
 
@@ -103,3 +104,4 @@ def actualizar_stock(sender, instance, **kwargs):
     producto = instance.producto
     producto.inventario.cantidad_stock -= instance.cantidad
     producto.inventario.save()
+

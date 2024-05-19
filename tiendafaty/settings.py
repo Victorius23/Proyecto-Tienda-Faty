@@ -67,6 +67,11 @@ JAZZMIN_SETTINGS = {
 
 }
 
+# Es la URL que podemos usar en nuestras plantillas para referenciar las imagenes.
+MEDIA_URL = '/media/'
+# Es la ruta absoluta del sistema donde se almacenará el archivo.
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 THIRD_PARTY_APPS = [
