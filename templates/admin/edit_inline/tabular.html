@@ -365,6 +365,10 @@
                 </button>
             </div>
             <div class="modal-body">
+                <p>Productos:</p>
+                <ul id="productos-seleccionados">
+                    <!-- Aquí se mostrarán los productos seleccionados -->
+                </ul>
                 <p>Total: <span id="modal-totalventa"></span></p>
                 <label for="dinero-recibido">Dinero recibido:</label>
                 <input type="number" class="form-control" id="dinero-recibido">
@@ -392,33 +396,47 @@
             }
         });
     
-        // Controlador de eventos click para el botón "Realizar venta"
-        $('input[type="submit"]').click(function (e) {
-            if ($(this).val() == 'Realizar venta') {
-                var productos = $('select[name$="producto"]');
-                var productosSeleccionados = 0;
-                productos.each(function () {
-                    if ($(this).val() != "") {
-                        productosSeleccionados++;
-                    }
-                });
-                if (productosSeleccionados == 0) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'No se puede realizar una venta sin productos',
-                        icon: 'error',
-                        confirmButtonText: 'Aceptar'
-                    });
-                } else {
-                    e.preventDefault();
-                    var total = parseFloat($('#totalventa').text().split('$')[1]);
-                    $('#modal-totalventa').text('$' + total.toFixed(2));
-                    $('#modal-venta').modal('show');
-             
-                }
+       // Controlador de eventos click para el botón "Realizar venta"
+$('input[type="submit"]').click(function (e) {
+    if ($(this).val() == 'Realizar venta') {
+        var productosSeleccionados = [];
+        var preciosSeleccionados = [];
+        var cantidadSeleccionada = [];
+        $('select[name$="producto"]').each(function () {
+            var productoSeleccionado = $(this).find('option:selected').text();
+            var precioSeleccionado = $(this).closest('tr').find('.field-precio').text();
+            var cantidad = $(this).closest('tr').find('input[name$=cantidad]').val();
+            if (productoSeleccionado && productoSeleccionado !== '---------') {
+                productosSeleccionados.push(productoSeleccionado);
+                preciosSeleccionados.push(precioSeleccionado);
+                cantidadSeleccionada.push(cantidad);
             }
         });
+        if (productosSeleccionados.length === 0) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Error',
+                text: 'No se puede realizar una venta sin productos',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+        } else {
+            e.preventDefault();
+            var total = parseFloat($('#totalventa').text().split('$')[1]);
+            $('#modal-totalventa').text('$' + total.toFixed(2));
+            $('#productos-seleccionados').empty();
+            for (var i = 0; i < productosSeleccionados.length; i++) {
+                var producto = productosSeleccionados[i];
+                var precio = preciosSeleccionados[i];
+                var cantidad = cantidadSeleccionada[i];
+                var li = '<li>' + producto + ' - $' + precio + ' - Cantidad: ' + cantidad + '</li>';
+                $('#productos-seleccionados').append(li);
+            }
+            $('#modal-venta').modal('show');
+        }
+    }
+});
+
     
         // Controlador de eventos click para el botón "Calcular Cambio"
         $('#calcular-modal').click(function () {
