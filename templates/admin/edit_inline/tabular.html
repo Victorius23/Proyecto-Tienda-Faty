@@ -1,4 +1,8 @@
 {% load i18n admin_urls static admin_modify %}
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+
 <div class="js-inline-admin-formset inline-group" id="{{ inline_admin_formset.formset.prefix }}-group"
     data-inline-type="tabular" data-inline-formset="{{ inline_admin_formset.inline_formset_data }}">
     <div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">
@@ -350,11 +354,99 @@
 </div>
 
 
+
+<div class="modal" id="modal-venta" tabindex="-1" role="dialog" aria-labelledby="modalVentaLabel" aria-hidden="true" data-backdrop="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalVentaLabel">Realizar Venta</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Total: <span id="modal-totalventa"></span></p>
+                <label for="dinero-recibido">Dinero recibido:</label>
+                <input type="number" class="form-control" id="dinero-recibido">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="calcular-modal">Calcular Cambio</button>
+                <button type="submit" class="btn btn-success">Finalizar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 {% if app_label == 'control_ventas' %}
 
+<script>
+   
+    
+    $(document).ready(function () {
+        // Cambia el valor del botón "Guardar" por "Realizar venta"
+        $('input[type="submit"]').each(function () {
+            if ($(this).val() == 'Guardar') {
+                $(this).val('Realizar venta');
+            }
+        });
+    
+        // Controlador de eventos click para el botón "Realizar venta"
+        $('input[type="submit"]').click(function (e) {
+            if ($(this).val() == 'Realizar venta') {
+                var productos = $('select[name$="producto"]');
+                var productosSeleccionados = 0;
+                productos.each(function () {
+                    if ($(this).val() != "") {
+                        productosSeleccionados++;
+                    }
+                });
+                if (productosSeleccionados == 0) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se puede realizar una venta sin productos',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+                } else {
+                    e.preventDefault();
+                    var total = parseFloat($('#totalventa').text().split('$')[1]);
+                    $('#modal-totalventa').text('$' + total.toFixed(2));
+                    $('#modal-venta').modal('show');
+             
+                }
+            }
+        });
+    
+        // Controlador de eventos click para el botón "Calcular Cambio"
+        $('#calcular-modal').click(function () {
+            var recibido = parseFloat($('#dinero-recibido').val());
+            var total = parseFloat($('#modal-totalventa').text().split('$')[1]);
+            var cambio = recibido - total;
+            // Mostrar el cambio en un SweetAlert
+            Swal.fire({
+                title: 'Cambio',
+                text: 'Su cambio es de: $' + cambio.toFixed(2),
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
+            }).then((result) => {
+                // Si se confirma el cambio en el SweetAlert, enviar el formulario de venta
+                if (result.isConfirmed) {
+                    $('#form-venta').submit();
+                }
+            });
+        });
+    });
+    
 
+</script>
 
 <script type="text/javascript">
+
+
+
     // * cuando la cantidad cambie, actualizar el subtotal de la fila
     $(document).on('change', 'input[name$=cantidad]', function () {
         var cantidad = $(this).val();
