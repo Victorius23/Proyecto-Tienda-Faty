@@ -388,6 +388,42 @@
 <script>
    
     
+    // Controlador de eventos para cambios en la tabla
+$(document).on('change', 'select[name$="producto"], input[name$="cantidad"]', function () {
+    var productosSeleccionados = [];
+    var preciosSeleccionados = [];
+    var cantidadSeleccionada = [];
+    
+    // Recopilar los datos actualizados de la tabla
+    $('select[name$="producto"]').each(function () {
+        var productoSeleccionado = $(this).find('option:selected').text();
+        var precioSeleccionado = $(this).closest('tr').find('.field-precio').text();
+        var cantidad = $(this).closest('tr').find('input[name$=cantidad]').val();
+        
+        if (productoSeleccionado && productoSeleccionado !== '---------') {
+            productosSeleccionados.push(productoSeleccionado);
+            preciosSeleccionados.push(precioSeleccionado);
+            cantidadSeleccionada.push(cantidad);
+        }
+    });
+    
+    // Actualizar el contenido del modal
+    var total = 0;
+    $('#productos-seleccionados').empty();
+    
+    for (var i = 0; i < productosSeleccionados.length; i++) {
+        var producto = productosSeleccionados[i];
+        var precio = preciosSeleccionados[i];
+        var cantidad = cantidadSeleccionada[i];
+        var li = '<li>' + producto + ' - $' + precio + ' - Cantidad: ' + cantidad + '</li>';
+        $('#productos-seleccionados').append(li);
+        total += parseFloat(precio) * parseFloat(cantidad);
+    }
+    
+    $('#modal-totalventa').text('$' + total.toFixed(2));
+});
+
+
     $(document).ready(function () {
         // Cambia el valor del botón "Guardar" por "Realizar venta"
         $('input[type="submit"]').each(function () {
