@@ -428,14 +428,13 @@ function verificarExistencias() {
                             icon: 'error',
                             confirmButtonText: 'Aceptar'
                         });
-                    } else {
-                        // Si no hay productos con existencias insuficientes, se imprime el ticket de venta
+                    } 
+                    //si no hay productos sin existencias se imprime el ticket u se realiza la venta
+                    if (productosSinExistencias.length === 0) {
                         printTicket();
-                        // Se activa el botón de submit para enviar el formulario
                         $('#submit-venta').click();
-                        
-
-                    }   
+                    }
+                    
                    
                }
             });
