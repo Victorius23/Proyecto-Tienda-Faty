@@ -377,8 +377,8 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn btn-primary" id="calcular-modal">Calcular Cambio</button>
-                {% comment %} <button type="button" class="btn btn-primary" onclick="verificarExistencias()">Finalizar Venta</button> {% endcomment %}
-                <button type="submit" class="btn btn-primary" onclick="printTicket()">Finalizar Venta</button>
+                <button type="button" class="btn btn-primary" onclick="verificarExistencias()">Finalizar Venta</button>
+                {% comment %} <button type="submit" class="btn btn-primary" onclick="printTicket()">Finalizar Venta</button> {% endcomment %}
 
             </div>
         </div>
@@ -392,34 +392,45 @@
 <script>
 
 
-    // Función para verificar las existencias de los productos seleccionados
-    function verificarExistencias() {
-       //se obtiene el id del producto seleccionados para la venta
-        var productosSeleccionados = [];
-        var cantidadSeleccionada = [];
-        $('select[name$="producto"]').each(function () {
-            var productoSeleccionado = $(this).find('option:selected').text();
-            var cantidad = $(this).closest('tr').find('input[name$=cantidad]').val();
-            if (productoSeleccionado && productoSeleccionado !== '---------') {
-                productosSeleccionados.push(productoSeleccionado);
-                cantidadSeleccionada.push(cantidad);
+// Función para verificar las existencias de los productos seleccionados
+function verificarExistencias() {
+    // Se recorren todos los productos seleccionados
+    $('select[name$="producto"]').each(function () {
+        var productoSeleccionado = $(this).find('option:selected');
+        var cantidad = $(this).closest('tr').find('input[name$=cantidad]').val();
+
+        // Se verifica si se ha seleccionado un producto y se obtiene su ID
+        if (productoSeleccionado && productoSeleccionado.val() !== '') {
+            var producto_id = productoSeleccionado.val();
+
+            // Se realiza una petición AJAX para obtener la cantidad en existencia del producto seleccionado
+            $.ajax({
+                url: "/api/cantidad-productos/",
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    id_producto: producto_id
+                },
+                success: function (response) {
+                    var cantidadExistente = response[0].cantidad_stock
+                    // Se verifica si la cantidad seleccionada es mayor a la cantidad en existencia
+                    if (parseInt(cantidad) > cantidadExistente) {
+                        // Si la cantidad seleccionada es mayor a la cantidad en existencia, se muestra un mensaje de error
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'No hay suficientes existencias del producto ' + productoSeleccionado.text(),
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar'
+                        });
+                    } else {
+                        // Si la cantidad seleccionada es menor o igual a la cantidad en existencia, se continúa con la venta
+                        printTicket();
+                }
             }
-        });
-        //se recorre el array de productos seleccionados
-        for (var i = 0; i < productosSeleccionados.length; i++) {
-            var producto = productosSeleccionados[i];
-            var cantidad = cantidadSeleccionada[i];
-            //se obtiene el id del producto seleccionado
-            var producto_id = $('select[name$="producto"]').find('option:selected').val();
-
-            
+            });
         }
-
-
-    
-
-
-    }
+    });
+}
 
     
 

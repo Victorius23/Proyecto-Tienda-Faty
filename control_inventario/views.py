@@ -21,4 +21,16 @@ class CantidadProductos(APIView):
         inventarios = Inventario.objects.filter(producto_id=id_producto)
         data = [{'producto': inv.producto.nombre, 'cantidad_stock': inv.cantidad_stock} for inv in inventarios]
         return JsonResponse(data, safe=False)
+    
+    #como accedo a la cantidad del stock con la repsuesta
+    #$.ajax({
+    #    url: '/cantidad-productos/?id_producto=1',
+    #    type: 'GET',
+    #    success: function(data) {
+        #se indica el indice del producto que se quiere ver
+    #        console.log(data[0].cantidad_stock);
+    #    }
+    #});
+    
+    
 
