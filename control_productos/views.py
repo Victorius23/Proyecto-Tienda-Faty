@@ -5,6 +5,9 @@ import json
 
 from .models import Producto, Categoria
 from .serializers import ProductoSerializer, CategoriaSerializer
+from django.http import JsonResponse
+
+
 
 
 class ProductoViewApi(viewsets.ModelViewSet):

@@ -10,8 +10,10 @@ from datetime import date
 #importa sun
 from django.db.models import Sum
 from django.utils import timezone
+from .bascula import obtener_peso_de_bascula
 
-
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 # Create your views here.
 
 
@@ -69,4 +71,21 @@ class GananciasPorMes(APIView):
 
         return Response({'ganancias': ventas})        
     
+ 
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def obtener_peso_bascula(request):
+    try:
+        puerto_serial = "COM3"  # Puerto serial de la báscula
+        baud_rate = 9600  # Velocidad de comunicación en baudios
+        secuencia = "P"  # Secuencia de comandos para obtener el peso
+        peso = obtener_peso_de_bascula(puerto_serial, baud_rate, secuencia)
         
+        # Eliminar las unidades "kg" del peso
+        peso_sin_unidades = peso.replace(' kg', '')
+        
+        return JsonResponse({'peso': peso_sin_unidades})
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
