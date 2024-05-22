@@ -405,8 +405,12 @@
         </div>
     </div>
 </div>
+
 <script>
     $(document).ready(function () {
+        var producto_id_modal = ""; // Variable para almacenar temporalmente el ID del producto
+        var categoria_modal = ""; // Variable para almacenar temporalmente la categoría del producto
+
         // Función para llamar a la API y obtener el peso de la báscula
         function obtenerPesoBascula() {
             // URL de tu API para obtener el peso de la báscula
@@ -430,35 +434,94 @@
             });
         }
     
+        // Función para abrir el modal de cantidad
+        function abrirModalCantidad(producto_id, categoria) {
+            producto_id_modal = producto_id; // Almacenar temporalmente el ID del producto
+            categoria_modal = categoria; // Almacenar temporalmente la categoría del producto
+            //console.logcategoria_modal);
+            $('#modal-cantidad').modal('show');
+            // Actualizar el valor del recuadro de cantidad en el modal con el peso de la báscula
+            setTimeout(actualizarCantidadModalConPeso, 1500); // Esperar 1.5 segundos antes de actualizar
+        }
+
         // Función para actualizar el valor del recuadro de cantidad en el modal con el peso de la báscula
         function actualizarCantidadModalConPeso() {
             obtenerPesoBascula(); // Llamar a la función para obtener el peso de la báscula
         }
-    
-        // Cuando se haga clic en el recuadro de cantidad se abrirá el modal de cantidad
+
+        // Evento que se dispara cuando se hace clic en un campo de cantidad
         $(document).on('click', 'input[name$=cantidad]', function () {
-           //mientras este abierto el modal se debe actualizar el peso
-            setInterval(actualizarCantidadModalConPeso, 1400);
-            $('#modal-cantidad').modal('show');
+            // Obtener el ID y la categoría del producto seleccionado
+            var producto_id = $(this).closest('tr').find('select[name$=producto]').val();
+            //la categoria se obtiene de un AJAX
+            $.ajax({
+                url: "/api/productos/" + producto_id + "/",
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    producto: producto_id
+                },
+                success: function (response) {
+                    var categoria = response.categoria;
+                    console.log('Producto ID:', producto_id); // Agregar esta línea
+                    console.log('Categoría:', categoria); // Agregar esta línea
+                    // Verificar si hay un producto seleccionado y si pertenece a la categoría 3
+                    if (producto_id !== "" && categoria === 3) {
+                        abrirModalCantidad(producto_id, categoria);
+                    }
+                }
+            });
+
         });
-    
+
         // Cuando se haga clic en el botón "Aceptar" dentro del modal de cantidad
         $('#aceptar-cantidad').click(function () {
             // Obtener el valor del peso recibido desde el recuadro de cantidad en el modal
             var pesoRecibido = $('#peso-recibido').val();
-    
-            // Actualizar el recuadro de cantidad en la fila correspondiente con el peso recibido
-            $('input[name$=cantidad]').val(pesoRecibido);
-    
-            // Cerrar el modal de cantidad
-            $('#modal-cantidad').modal('hide');
+            console.log('Peso recibido:', pesoRecibido); // Agregar esta línea
+            
+            // Verificar si el peso recibido es válido (no nulo ni vacío)
+            if (pesoRecibido !== null && pesoRecibido !== '') {
 
+                // Buscar el input de cantidad correspondiente al producto y categoría que abrió el modal y colocar el peso recibido
+                $('input[name^="detalles"][name$="cantidad"]').each(function () {
+                    var fila = $(this).attr('name').split('-')[1];
+                    var producto_id_actual = $('select[name="detalles-' + fila + '-producto"]').val();
+                  
+                  
+                  
+                    if (producto_id_actual == producto_id_modal  && !$(this).val()) {
+                        $(this).val(pesoRecibido);
+
+                        // Calcular el importe
+                        var precio = parseFloat($('select[name="detalles-' + fila + '-producto"]').closest('tr').find('td.field-precio').text());
+                        var subtotal = pesoRecibido * precio;
+                        $('select[name="detalles-' + fila + '-producto"]').closest('tr').find('td.field-importe').text(subtotal);
+
+                        // Calcular el total
+                        var total = 0;
+                        $('td.field-importe').each(function () {
+                            if (!$(this).text().includes('-')) {
+                                total += parseFloat($(this).text());
+                            }
+                        });
+                        $('#totalventa').text('Total: $' + total.toFixed(2));
+
+                        // Salir del bucle cuando se encuentre el input de cantidad adecuado
+                        return false;
+                    }
+                });
+
+                // Cerrar el modal de cantidad
+                $('#modal-cantidad').modal('hide');
+            } else {
+                // Si el peso recibido no es válido, mostrar un mensaje de error o realizar alguna acción adecuada
+                console.error('Error: El peso recibido no es válido.');
+            }
         });
-        
     });
-    
-    </script>
-    
+</script>
+
 
 
 {% if app_label == 'control_ventas' %}

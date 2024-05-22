@@ -8,6 +8,7 @@ def obtener_peso_de_bascula(puerto_serial, baud_rate, secuencia):
         time.sleep(0.1)  # Esperar un momento para que la báscula responda
         peso = ser.readline().strip().decode()
         ser.close()
+        
         return peso
     except Exception as e:
         return str(e)
