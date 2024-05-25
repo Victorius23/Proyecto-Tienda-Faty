@@ -11,6 +11,7 @@ from datetime import date
 from django.db.models import Sum
 from django.utils import timezone
 from .bascula import obtener_peso_de_bascula
+from .ProductosMasVendidosPredictor import ProductosMasVendidosPredictor
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -78,6 +79,8 @@ class GananciasPorMes(APIView):
 @permission_classes([AllowAny])
 def obtener_peso_bascula(request):
     try:
+        #se trata en el caso de que el puerto serial no sea el correcto y se coloca el puerto correcto
+        #dependiendo del puerto que se tenga
         puerto_serial = "COM3"  # Puerto serial de la báscula
         baud_rate = 9600  # Velocidad de comunicación en baudios
         secuencia = "P"  # Secuencia de comandos para obtener el peso
@@ -89,3 +92,12 @@ def obtener_peso_bascula(request):
         return JsonResponse({'peso': peso_sin_unidades})
     except Exception as e:
         return JsonResponse({'error': str(e)})
+
+class PrediccionProductosMasVendidos(APIView):
+    def get(self, request):
+        predictor = ProductosMasVendidosPredictor()
+        predictor.entrenar_modelo()
+        predicciones = predictor.predecir_productos_mas_vendidos()
+
+        data = [{'producto': f'Producto {i + 1}', 'ventas': int(prediccion)} for i, prediccion in enumerate(predicciones)]
+        return Response(data)
