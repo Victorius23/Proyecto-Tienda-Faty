@@ -41,7 +41,7 @@ class VentaAdmin(admin.ModelAdmin):
 
     list_display = ("fecha", "cliente", "total")
 
-    readonly_fields = []
+    readonly_fields = ['fecha']
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
