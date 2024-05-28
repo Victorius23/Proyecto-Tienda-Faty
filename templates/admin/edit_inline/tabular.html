@@ -356,6 +356,11 @@
 
 
 
+{% if app_label == 'control_ventas' %}
+
+
+
+
 <div class="modal" id="modal-venta" tabindex="-1" role="dialog" aria-labelledby="modalVentaLabel" aria-hidden="true" data-backdrop="false">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -524,7 +529,6 @@
 
 
 
-{% if app_label == 'control_ventas' %}
 
 
 <script>
@@ -771,6 +775,23 @@ $(document).on('change', 'select[name$="producto"], input[name$="cantidad"]', fu
         });
         $('#totalventa').text('Total: $' + total.toFixed(2));
 
+    });
+</script>
+
+{% endif %}
+
+{% if app_label == 'control_compras' %}
+
+<script>
+    //camvia el texto del boton guardar por compra 
+
+    $(document).ready(function () {
+        // Cambia el valor del botón "Guardar" por "Realizar compra"
+        $('input[type="submit"]').each(function () {
+            if ($(this).val() == 'Guardar') {
+                $(this).val('Realizar compra');
+            }
+        });
     });
 </script>
 
