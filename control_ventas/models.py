@@ -4,6 +4,8 @@ from django.db import models
 # * LAST modified and created at fields
 from model_utils.models import TimeStampedModel
 
+from control_inventario.models import Inventario
+
 # * modelo usuario
 from django.contrib.auth.models import User
 
@@ -34,7 +36,7 @@ class Venta(TimeStampedModel):
     estado = models.CharField(max_length=20, default='en proceso', choices=(
         ('en proceso', 'En Proceso'),
         ('entregado', 'Entregado'),
-        ('cancelado', 'Cancelado')
+        ('cancelada', 'Cancelada')
     ))
 
     es_pedido = models.BooleanField(default=False)
@@ -105,3 +107,12 @@ def actualizar_stock(sender, instance, **kwargs):
     producto.inventario.cantidad_stock -= instance.cantidad
     producto.inventario.save()
 
+@receiver(post_save, sender=Venta)
+def actualizar_status(sender, instance, **kwargs):
+    
+    if instance.estado == 'cancelada':
+        for detalle in instance.detalles.all():
+            inventario = Inventario.objects.get(producto=detalle.producto)
+            inventario.cantidad_stock += detalle.cantidad
+            inventario.save()
+    
