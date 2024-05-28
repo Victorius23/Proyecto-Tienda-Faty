@@ -673,11 +673,13 @@ $(document).on('change', 'select[name$="producto"], input[name$="cantidad"]', fu
 
     $(document).ready(function () {
         // Cambia el valor del botón "Guardar" por "Realizar venta"
+         // {% if not original %}
         $('input[type="submit"]').each(function () {
             if ($(this).val() == 'Guardar') {
                 $(this).val('Realizar venta');
             }
         });
+        // {% endif %}
     
        // Controlador de eventos click para el botón "Realizar venta"
     $('input[type="submit"]').click(function (e) {
