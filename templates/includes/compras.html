@@ -1,0 +1,471 @@
+<script>
+    $(document).ready(function () {
+
+
+        // cuando se seleccione una categoria actualizar el select de productos
+        $('#id_categoria').on('select2:select', function (e) {
+            var categoria_id = $(this).val();
+            console.log("categoria_id: " + categoria_id);
+            var url_api = "/api/productos_categoria/";
+            if (categoria_id == "") {
+                url_api = "/api/productos/";
+            }
+
+            $.ajax({
+                url: url_api,
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    categoria: categoria_id
+                },
+                success: function (response) {
+                    $('select[name$="producto"]').each(
+
+                        function () {
+                            // Verificar si el select ya tiene opciones
+                            if ($(this).val() != "") {
+                                return; // Si ya tiene opciones, salir del bucle para este select
+                            }
+
+                            // Limpiar opciones existentes y agregar la opción por defecto
+                            $(this).find('option').remove().end().append(
+                                '<option value="">---------</option>');
+
+                            // Agregar opciones del response
+                            for (var i = 0; i < response.length; i++) {
+                                var id = response[i].id;
+                                var name = response[i].nombre;
+                                var option = "<option value='" + id + "'>" +
+                                    name +
+                                    "</option>";
+                                $(this).append(option);
+                            }
+                        });
+
+                }
+            });
+
+
+        });
+
+        // hacer que el id id_detalles-__prefix__-cantidad sea readonly
+        $('#id_detalles_compra-__prefix__-cantidad').prop('readonly', true);
+
+        if ($('select[name$="producto"]').val() == "") {
+            var numero_fila = $('select[name$="producto"]').attr('name').split('-')[1];
+
+            // obtener el input de la cantidad de la misma fila y hacer que sea readonly
+            var cantidad = $('input[name="detalles_compra-' + numero_fila + '-cantidad"]').prop('readonly',
+                true);
+        }
+
+        // agregar un span al lado de "tabular inline-related last-related" que diga "total"
+        var totalSpan = $('<span id="totalventa">Total: $0.00</span>');
+        $('.tabular.inline-related.last-related').after(totalSpan);
+        // hacer que el texto aparezca pegado al borde derecho
+        totalSpan.css('float', 'right');
+        // agregar 50% de margen a la derecha
+        totalSpan.css('margin-right', '20%');
+
+        var readonlyDiv = $('.form-group.field-fecha .readonly');
+        readonlyDiv.text(new Date().toLocaleDateString());
+
+        // agregar columna de el usuario logueado abajo de la fecha class="flex-container"
+        //  si hay objeto "obj" en el contexto de la vista no mostrar lo de abajo
+        // {% if  original %}
+
+
+        // {% else %}
+        var userDiv = $(
+            '<div class="form-group field-empleado"><div class="row"><label class="col-sm-3 text-left" for="id_empleado">Empleado:</label><div class="col-sm-7 field-empleado"><div class="readonly">{{ user }}</div></div></div></div>'
+        );
+        $('.form-group.field-fecha').after(userDiv);
+        // {% endif %}
+
+        // agregar columna de precio
+        $('th.column-cantidad').after('<th class="column-precio">Precio</th>');
+        $('td.field-cantidad').after('<td class="field-precio">-</td>');
+
+        $.ajax({
+            url: "/api/categorias/",
+            type: 'get',
+            dataType: 'json',
+            success: function (response) {
+                var len = response.length;
+                for (var i = 0; i < len; i++) {
+                    var id = response[i].id;
+                    var name = response[i].nombre;
+                    var option = "<option value='" + id + "'>" + name + "</option>";
+                    $("#id_categoria").append(option);
+                }
+            }
+        });
+
+        // si hay un producto seleccionado, obtener el precio y mostrarlo en la columna precio
+        $('select[name$="producto"]').each(function () {
+            // mostrar el id del select
+            console.log('id: ' + $(this).attr('id'));
+            var producto_id = $(this).val();
+            //console.log("producto_id: " + producto_id);
+            var fila = $(this).attr('name');
+            fila = fila.split('-')[1];
+            if (producto_id == "") {
+                return;
+            }
+            $.ajax({
+                url: "/api/productos/" + producto_id + "/",
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    producto: producto_id
+                },
+                success: function (response) {
+                    var precio = response.precioventa;
+
+                    $('select[name^="detalles_compra-' + fila + '-producto"]').closest(
+                            'tr').find('td.field-precio')
+                        .text(precio);
+                    $('select[name^="detalles_compra-' + fila + '-producto"]').closest(
+                            'tr').find('td.field-importe')
+                        .text(precio * $('select[name^="detalles_compra-' + fila +
+                            '-producto"]').closest('tr').find(
+                            'input[name$="cantidad"]').val());
+
+                    // calcular total
+                    var total = 0;
+                    $('td.field-importe').each(function () {
+                        var importeText = $(this).text().trim();
+                        if (importeText && !importeText.includes('-')) {
+                            total += parseFloat(importeText);
+                        }
+                    });
+                    $('#totalventa').text('Total: $' + total.toFixed(2));
+                }
+            });
+        });
+
+        // cuando los detalles-__prefix__-producto cambien, actualizar el precio
+
+
+        $(document).on('select2:select', 'select[name$=producto]', function () {
+            console.log('cambio');
+            var producto_id = $(this).val();
+            console.log(producto_id);
+            var fila = $(this).attr('name');
+            fila = fila.split('-')[1];
+            if (producto_id == "") {
+                // restar al total
+                var total = 0;
+                //obtener total actual
+                var total = parseFloat($('#totalventa').text().split('$')[1]);
+                // restar el importe de la fila
+                var importe = parseFloat($('select[name^="detalles_compra-' + fila + '-producto"]')
+                    .closest('tr').find(
+                        'td.field-importe').text());
+                total -= importe;
+                // si no se ha seleccionado un producto, borrar el texto de la columna precio
+                $('select[name^="detalles_compra-' + fila + '-producto"]').closest('tr').find(
+                    'td.field-precio').text('-');
+                $('select[name^="detalles_compra-' + fila + '-producto"]').closest('tr').find(
+                    'td.field-importe').text(
+                    '-');
+                $('select[name^="detalles_compra-' + fila + '-producto"]').closest('tr').find(
+                    'input[name$=cantidad]').val(
+                    '');
+                // read only cantidad
+                $('select[name^="detalles_compra-' + fila + '-producto"]').closest('tr').find(
+                        'input[name$=cantidad]')
+                    .attr(
+                        'readonly', true);
+                // total a 0
+                $('#totalventa').text('Total: $' + total.toFixed(2));
+                // cantidad a 0
+                return;
+            }
+            // quitar readonly
+            $('select[name^="detalles_compra-' + fila + '-producto"]').closest('tr').find(
+                'input[name$=cantidad]').attr(
+                'readonly',
+                false);
+            $.ajax({
+                url: "/api/productos/" + producto_id + "/",
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    producto: producto_id
+                },
+                success: function (response) {
+                    // extraer x de name=detalles-x-producto
+
+                    var precio = response.precioventa;
+                    console.log("precio:" + precio);
+
+                    $('select[name^="detalles_compra-' + fila + '-producto"]').closest(
+                        'tr').find(
+                        'td.field-precio').text(
+                        precio);
+                    $('select[name^="detalles_compra-' + fila + '-producto"]').closest(
+                        'tr').find(
+                        'td.field-importe').text(
+                        precio * $('select[name^="detalles_compra-' + fila +
+                            '-producto"]').closest('tr')
+                        .find(
+                            'input[name$=cantidad]').val());
+                    // calcular total
+                    var total = 0;
+                    // todos menos el último
+                    $('td.field-importe').each(function () {
+                        console.log("dato: " + $(this).text());
+                        // si tiene un en su texto un "-" no sumar
+                        if ($(this).text().includes('-')) {
+                            return;
+                        }
+                        total += parseFloat($(this).text());
+                    });
+                    $('#totalventa').text('Total: $' + total.toFixed(2));
+                }
+            });
+        });
+
+
+    });
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        var producto_id_modal = ""; // Variable para almacenar temporalmente el ID del producto
+        var categoria_modal = ""; // Variable para almacenar temporalmente la categoría del producto
+ 
+
+        // Evento que se dispara cuando se hace clic en un campo de cantidad
+        $(document).on('click', 'input[name$=cantidad]', function () {
+            // Obtener el ID y la categoría del producto seleccionado
+            var producto_id = $(this).closest('tr').find('select[name$=producto]').val();
+            //la categoria se obtiene de un AJAX
+            $.ajax({
+                url: "/api/productos/" + producto_id + "/",
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    producto: producto_id
+                },
+                success: function (response) {
+                    var categoria = response.categoria;
+                    console.log('Producto ID:', producto_id); // Agregar esta línea
+                    console.log('Categoría:', categoria); // Agregar esta línea
+                    // Verificar si hay un producto seleccionado y si pertenece a la categoría 3
+                    if (producto_id !== "" && categoria === 3) {
+                        abrirModalCantidad(producto_id, categoria);
+                    }
+                }
+            });
+
+        });
+
+        // Cuando se haga clic en el botón "Aceptar" dentro del modal de cantidad
+        $('#aceptar-cantidad').click(function () {
+            // Obtener el valor del peso recibido desde el recuadro de cantidad en el modal
+            var pesoRecibido = $('#peso-recibido').val();
+            console.log('Peso recibido:', pesoRecibido); // Agregar esta línea
+
+            // Verificar si el peso recibido es válido (no nulo ni vacío)
+            if (pesoRecibido !== null && pesoRecibido !== '') {
+
+                // Buscar el input de cantidad correspondiente al producto y categoría que abrió el modal y colocar el peso recibido
+                $('input[name^="detalles_compra"][name$="cantidad"]').each(function () {
+                    var fila = $(this).attr('name').split('-')[1];
+                    var producto_id_actual = $('select[name="detalles_compra-' + fila + '-producto"]')
+                        .val();
+
+
+
+                    if (producto_id_actual == producto_id_modal && !$(this).val()) {
+                        $(this).val(pesoRecibido);
+
+                        // Calcular el importe
+                        var precio = parseFloat($('select[name="detalles_compra-' + fila +
+                            '-producto"]').closest('tr').find('td.field-precio').text());
+                        var subtotal = pesoRecibido * precio;
+                        $('select[name="detalles_compra-' + fila + '-producto"]').closest('tr').find(
+                            'td.field-importe').text(subtotal);
+
+                        // Calcular el total
+                        var total = 0;
+                        $('td.field-importe').each(function () {
+                            if (!$(this).text().includes('-')) {
+                                total += parseFloat($(this).text());
+                            }
+                        });
+                        $('#totalventa').text('Total: $' + total.toFixed(2));
+
+                        // Salir del bucle cuando se encuentre el input de cantidad adecuado
+                        return false;
+                    }
+                });
+
+                // Cerrar el modal de cantidad
+                $('#modal-cantidad').modal('hide');
+            } else {
+                // Si el peso recibido no es válido, mostrar un mensaje de error o realizar alguna acción adecuada
+                console.error('Error: El peso recibido no es válido.');
+            }
+        });
+    });
+</script>
+
+
+
+
+
+<script>
+   
+
+
+
+    //fuccion para imprimir el ticket de la venta por medio de la impresora que este conectada
+    //la impresora es una EPSON L5190 Series 
+
+
+
+
+
+    // Controlador de eventos para cambios en la tabla
+    $(document).on('change', 'select[name$="producto"], input[name$="cantidad"]', function () {
+        var productosSeleccionados = [];
+        var preciosSeleccionados = [];
+        var cantidadSeleccionada = [];
+
+        // Recopilar los datos actualizados de la tabla
+        $('select[name$="producto"]').each(function () {
+            var productoSeleccionado = $(this).find('option:selected').text();
+            var precioSeleccionado = $(this).closest('tr').find('.field-precio').text();
+            var cantidad = $(this).closest('tr').find('input[name$=cantidad]').val();
+
+            if (productoSeleccionado && productoSeleccionado !== '---------') {
+                productosSeleccionados.push(productoSeleccionado);
+                preciosSeleccionados.push(precioSeleccionado);
+                cantidadSeleccionada.push(cantidad);
+            }
+        });
+
+        // Actualizar el contenido del modal
+        var total = 0;
+        $('#productos-seleccionados').empty();
+
+        for (var i = 0; i < productosSeleccionados.length; i++) {
+            var producto = productosSeleccionados[i];
+            var precio = preciosSeleccionados[i];
+            var cantidad = cantidadSeleccionada[i];
+            var li = '<li>' + producto + ' - $' + precio + ' - Cantidad: ' + cantidad + '</li>';
+            $('#productos-seleccionados').append(li);
+            total += parseFloat(precio) * parseFloat(cantidad);
+        }
+
+        $('#modal-totalventa').text('$' + total.toFixed(2));
+    });
+
+
+    $(document).ready(function () {
+        // Cambia el valor del botón "Guardar" por "Realizar venta"
+        $('input[type="submit"]').each(function () {
+            if ($(this).val() == 'Guardar') {
+                $(this).val('Realizar venta');
+            }
+        });
+
+        // Controlador de eventos click para el botón "Realizar venta"
+        $('input[type="submit"]').click(function (e) {
+            if ($(this).val() == 'Realizar venta') {
+                var productosSeleccionados = [];
+                var preciosSeleccionados = [];
+                var cantidadSeleccionada = [];
+                $('select[name$="producto"]').each(function () {
+                    var productoSeleccionado = $(this).find('option:selected').text();
+                    var precioSeleccionado = $(this).closest('tr').find('.field-precio').text();
+                    var cantidad = $(this).closest('tr').find('input[name$=cantidad]').val();
+                    if (productoSeleccionado && productoSeleccionado !== '---------') {
+                        productosSeleccionados.push(productoSeleccionado);
+                        preciosSeleccionados.push(precioSeleccionado);
+                        cantidadSeleccionada.push(cantidad);
+                    }
+                });
+                if (productosSeleccionados.length === 0) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se puede realizar una venta sin productos',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+                } else {
+                    e.preventDefault();
+                    var total = parseFloat($('#totalventa').text().split('$')[1]);
+                    $('#modal-totalventa').text('$' + total.toFixed(2));
+                    $('#productos-seleccionados').empty();
+                    for (var i = 0; i < productosSeleccionados.length; i++) {
+                        var producto = productosSeleccionados[i];
+                        var precio = preciosSeleccionados[i];
+                        var cantidad = cantidadSeleccionada[i];
+                        var li = '<li>' + producto + ' - $' + precio + ' - Cantidad: ' + cantidad +
+                            '</li>';
+                        $('#productos-seleccionados').append(li);
+                    }
+                    $('#modal-venta').modal('show');
+
+
+                }
+            }
+        });
+
+
+
+
+        // Controlador de eventos click para el botón "Calcular Cambio"
+        $('#calcular-modal').click(function () {
+            var recibido = parseFloat($('#dinero-recibido').val());
+            var total = parseFloat($('#modal-totalventa').text().split('$')[1]);
+            var cambio = recibido - total;
+            // Mostrar el cambio en un SweetAlert
+            Swal.fire({
+                title: 'Cambio',
+                text: 'Su cambio es de: $' + cambio.toFixed(2),
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
+            }).then((result) => {
+                // Si se confirma el cambio en el SweetAlert, enviar el formulario de venta
+                if (result.isConfirmed) {
+                    $('#form-venta').submit();
+                }
+            });
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    // * cuando la cantidad cambie, actualizar el subtotal de la fila
+    $(document).on('change', 'input[name$=cantidad]', function () {
+        var cantidad = $(this).val();
+        var fila = $(this).attr('name');
+        fila = fila.split('-')[1];
+        var precio = $('select[name^="detalles_compra-' + fila + '-producto"]').closest('tr').find('td.field-precio')
+            .text();
+        console.log(precio);
+        var subtotal = cantidad * precio;
+        $('select[name^="detalles_compra-' + fila + '-producto"]').closest('tr').find('td.field-importe').text(
+            subtotal);
+        // calcular total
+        var total = 0;
+        // todos menos el último
+        $('td.field-importe').each(function () {
+            console.log("dato: " + $(this).text());
+            // si tiene un en su texto un "-" no sumar
+            if ($(this).text().includes('-')) {
+                return;
+            }
+            total += parseFloat($(this).text());
+        });
+        $('#totalventa').text('Total: $' + total.toFixed(2));
+
+    });
+</script>

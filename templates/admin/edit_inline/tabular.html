@@ -10,9 +10,10 @@
         {{ inline_admin_formset.formset.management_form }}
         <fieldset class="module {{ inline_admin_formset.classes }}">
             {{ inline_admin_formset.formset.non_form_errors }}
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
             {% if app_label == 'control_ventas' %}
             {% comment %} select categorias {% endcomment %}
-            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
             <div class="">
                 <select name="categoria" id="id_categoria">
@@ -794,5 +795,7 @@ $(document).on('change', 'select[name$="producto"], input[name$="cantidad"]', fu
         });
     });
 </script>
+
+{% include "includes/compras.html" %}
 
 {% endif %}
