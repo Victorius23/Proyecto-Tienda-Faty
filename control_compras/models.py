@@ -11,8 +11,7 @@ from control_productos.models import Proveedor
 
 
 class Compra(TimeStampedModel):
-    fecha = models.DateField()
-    proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
+    fecha = models.DateField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     empleado = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -35,10 +34,10 @@ class Compra(TimeStampedModel):
 
 
 class DetalleCompra(TimeStampedModel):
-    compra = models.ForeignKey(Compra, on_delete=models.CASCADE)
+    compra = models.ForeignKey(Compra, on_delete=models.CASCADE, related_name='detalles_compra')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField()
-    importe = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Subtotal')
+    importe = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Subtotal', null=True, blank=True)
     
     def __str__(self):
         return f'{self.compra} - {self.producto}'
