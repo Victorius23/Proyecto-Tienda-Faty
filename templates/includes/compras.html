@@ -368,15 +368,17 @@
 
     $(document).ready(function () {
         // Cambia el valor del botón "Guardar" por "Realizar venta"
+        // {% if not original %}
         $('input[type="submit"]').each(function () {
             if ($(this).val() == 'Guardar') {
-                $(this).val('Realizar venta');
+                $(this).val('Realizar compra');
             }
         });
+        // {% endif %}
 
         // Controlador de eventos click para el botón "Realizar venta"
         $('input[type="submit"]').click(function (e) {
-            if ($(this).val() == 'Realizar venta') {
+            if ($(this).val() == 'Realizar compra') {
                 var productosSeleccionados = [];
                 var preciosSeleccionados = [];
                 var cantidadSeleccionada = [];
