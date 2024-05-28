@@ -9,24 +9,24 @@ from control_productos.models import Producto
 
 from control_productos.models import Proveedor
 
+# * receiver
+from django.dispatch import receiver
+# * post_save
+from django.db.models.signals import post_save
+
+from control_inventario.models import Inventario
+
+from decimal import Decimal
+
 
 class Compra(TimeStampedModel):
     fecha = models.DateField(auto_now_add=True)
-    total = models.DecimalField(max_digits=10, decimal_places=2)
-    empleado = models.ForeignKey(User, on_delete=models.CASCADE)
+    total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    empleado = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        return f'{self.fecha} - {self.proveedor} - {self.total}'
+        return f'{self.fecha} - {self.total}'
     
-    def incrementar_stock(self):
-        for detalle in self.detallecompra_set.all():
-            producto = detalle.producto
-            producto.stock += detalle.cantidad
-            producto.save()
-
-    def save(self, *args, **kwargs):
-        self.incrementar_stock()
-        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Compra'
@@ -45,6 +45,23 @@ class DetalleCompra(TimeStampedModel):
     class Meta:
         verbose_name = 'Detalle de Compra'
         verbose_name_plural = 'Detalles de Compras'
+        
+@receiver(models.signals.post_save, sender=DetalleCompra)
+def actualizar_inventario_compra(sender, instance, created, **kwargs):
+
+    compra = instance.compra
+    if compra.total is None:
+        compra.total = Decimal('0.0')
+
+    compra.total += instance.importe
+    compra.save()
+
+    inventario = Inventario.objects.get(producto=instance.producto)
+    inventario.cantidad_stock += instance.cantidad
+    inventario.save()
+
+    print(f'Inventario actualizado para {instance.producto.nombre}')
+
 
 
 
