@@ -15,8 +15,7 @@ class DetalleVentaInline(admin.TabularInline):
 
     # modelo detalle de venta y precio del producto
     model = DetalleVenta
-    
-    
+
     # se muestra el producto, el precio, la cantidad y el importe
     fields = ("producto", "cantidad", "importe")
 
@@ -28,6 +27,12 @@ class DetalleVentaInline(admin.TabularInline):
     extra = 1
 
     form = DetalleVentaForm
+    
+    
+    def has_change_permission(self, request, obj=None):
+        if obj:
+            return False
+        return True
 
 
 class VentaAdmin(admin.ModelAdmin):
@@ -36,11 +41,17 @@ class VentaAdmin(admin.ModelAdmin):
 
     list_display = ("fecha", "cliente", "total")
 
+    readonly_fields = []
+
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ("cliente", "total", "estado", "fecha", "es_pedido", "empleado")
+            reado = ["cliente", "total", "fecha", "es_pedido", "empleado"]
+            if obj.estado == "cancelada":
+                reado += ["estado"]
+            return self.readonly_fields + reado
         else:
-            return ("total", "estado", "fecha")
+            return self.readonly_fields
+
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
@@ -72,7 +83,7 @@ class VentaAdmin(admin.ModelAdmin):
             ]
 
         return fieldsets
-    
+
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         obj.empleado = request.user
@@ -81,8 +92,6 @@ class VentaAdmin(admin.ModelAdmin):
         # total = sum([detalle.importe for detalle in obj.detalles.all()])
         # obj.total = total
         # obj.save()
-        
-    
+
+
 admin.site.register(Venta, VentaAdmin)
-
-
